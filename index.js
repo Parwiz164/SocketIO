@@ -7,45 +7,34 @@ app.get('/', function(req, res){
     res.sendFile(__dirname + '/index.html');
 });
 
-http.listen(3000, function(){
+http.listen(3001, function(){
     console.log('listening on *:3000');
 });
 
 //when socket is connected
 io.on('connection', function(socket){
 
-    //emit message to all front-end clients
-    io.emit('chat message', 'user connected');
-
-    //handling disconnects
-    socket.on('disconnect', function() {
-        io.emit('chat message', 'some user disconnected');
+    socket.on("join", function(name){
+        people[socket.id] = name;
+        socket.emit("update", "You have connected to the server.");
+        socket.broadcast.emit("update", name + " has joined the server.")
+        // socket.broadcast.emit("update-people", people);
     });
 
-    socket.on('chat message', function(msg){
-        io.emit('chat message', msg);
+    socket.on("send", function(msg){
+        io.emit("chat message", people[socket.id], msg);
     });
 
+    socket.on("disconnect", function(){
+        io.emit("update", people[socket.id] + " has left the server.");
+        delete people[socket.id];
+        // io.emit("update-people", people);
+    });
+    // //handling disconnects
+    // socket.on('disconnect', function() {
+    //     io.emit('chat message', 'some user disconnected');
+    // });
 });
-//
-// io.on("connection", function (client) {
-//     client.on("join", function(name){
-//         people[client.id] = name;
-//         client.emit("update", "You have connected to the server.");
-//         socket.sockets.emit("update", name + " has joined the server.")
-//         socket.sockets.emit("update-people", people);
-//     });
-//
-//     client.on("send", function(msg){
-//         socket.sockets.emit("chat", people[client.id], msg);
-//     });
-//
-//     client.on("disconnect", function(){
-//         socket.sockets.emit("update", people[client.id] + " has left the server.");
-//         delete people[client.id];
-//         socket.sockets.emit("update-people", people);
-//     });
-// });
 
 
 

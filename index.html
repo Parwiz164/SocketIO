@@ -11,38 +11,90 @@
         #messages { list-style-type: none; margin: 0; padding: 0; }
         #messages li { padding: 5px 10px; }
         #messages li:nth-child(odd) { background: #eee; }
+        #people { list-style-type: none; margin: 0; padding: 0; }
+        #people li { padding: 5px 10px; }
+        #people li:nth-child(odd) { background: #eee; }
     </style>
 </head>
 <body>
-<ul id="messages"></ul>
-<form action="">
-    <input id="m" autocomplete="off" /><button>Send</button>
-</form>
+
+<!--<div>-->
+    <!--<ul id="people" ></ul>-->
+<!--</div>-->
+<div>
+    <ul id="messages"></ul>
+</div>
+
+
+
+<div id="chat">
+    <form action="">
+        <input type="text" class="input" placeholder="Your message" id="msg">
+        <input type="button" name="send" id="send" value="Send" class="btn btn-success">
+    </form>
+</div>
+<div id="login">
+    <form>
+        <input type="text" class="input-small" placeholder="Your name" id="name">
+        <input type="button" name="join" id="join" value="Join" class="btn btn-primary">
+    </form>
+</div>
+
 
 <script src="/socket.io/socket.io.js"></script>
 <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
 <script>
     $(function () {
         var socket = io();
-        $('form').submit(function(){
-            socket.emit('chat message', $('#m').val());
-            $('#m').val('');
-            return false;
+        $("#chat").hide();
+        $("#name").focus();
+        $("form").submit(function(event){
+            event.preventDefault();
         });
 
-        //on io.emit from backend (notice 'chat message' event has same name as server side)
-        socket.on('chat message', function(msg){
-            //handle the message however you would like
-            $('#messages').append($('<li>').text(msg));
+        $("#join").click(function(){
+            var name = $("#name").val();
+            if (name != "") {
+                socket.emit("join", name);
+                $("#login").detach();
+                $("#chat").show();
+                $("#msg").focus();
+                ready = true;
+            }
         });
+
+        $("#send").click(function(){
+            var msg = $("#msg").val();
+            socket.emit("send", msg);
+            $("#msg").val("");
+        });
+
+        socket.on("update", function(msg) {
+            if(ready)
+                $('#messages').append($('<li>').text(msg));
+        })
+
+        socket.on('chat message', function(who, msg){
+            //handle the message however you would like
+            if(ready) {
+                $('#messages').append($('<li>').text(who + " says:" + msg));
+            }
+        });
+
+
+        // socket.on("update-people", function(people){
+        //     if(ready) {
+        //         $("#people").empty();
+        //         $.each(people, function(clientid, name) {
+        //             $('#people').append($('<li>').text(name));
+        //         });
+        //     }
+        // });
     });
+
+
 </script>
 
 </body>
 </html>
-
-
-
-
-
 

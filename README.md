@@ -25,3 +25,10 @@ in index.js
 
 Navigate to http://localhost:3000 to see the working example!
 
+This assignment is done by following this tutorial
+https://socket.io/get-started/chat/
+
+In addition some extra features are added:
+* Broadcast a message to connected users when someone connects or disconnects
+* Add support for nicknames
+* Don’t send the same message to the user that sent it himself. Instead, append the message directly as soon as he presses enter.
